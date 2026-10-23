@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>鹃礼 · 视频生成</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="topbar" data-od-id="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="none">
+          <rect x="1.5" y="1.5" width="10.5" height="10.5" rx="3" fill="currentColor" />
+          <rect x="8" y="8" width="10.5" height="10.5" rx="3" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+      </span>
+      <span class="brand-name">鹃礼</span>
+    </div>
+    <span class="topbar-divider" aria-hidden="true"></span>
+    <nav class="topnav" aria-label="工具">
+      <span class="navitem is-active" aria-current="page">视频生成</span>
+    </nav>
+    <div class="topbar-right">
+      <span class="api-chip">API · GenerateVideo</span>
+      <button class="btn btn-secondary btn-sm" id="btnRecords" data-od-id="btn-records" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 1.8" />
+        </svg>
+        <span>生成记录</span>
+        <span class="count-badge" id="recordCount" hidden>0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace" id="main">
+    <aside class="panel params" data-od-id="params-panel" aria-labelledby="paramsTitle">
+      <div class="panel-head">
+        <div>
+          <h1 id="paramsTitle">参数设置</h1>
+          <p class="panel-sub">GenerateVideo · 单条视频输出</p>
+        </div>
+        <button class="icon-btn" id="btnResetParams" type="button" title="恢复默认参数" aria-label="恢复默认参数">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.5 4.5v5h5" /><path d="M4.2 14a8 8 0 1 0 1.6-7.4L3.5 9" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="panel-body">
+        <section class="group" data-od-id="group-output">
+          <div class="group-head"><h2>输出规格</h2><span>01</span></div>
+
+          <div class="field" data-od-id="field-scene">
+            <span class="field-label" id="sceneLabel">场景类型</span>
+            <div class="seg" role="radiogroup" aria-labelledby="sceneLabel" data-seg="scene">
+              <button type="button" role="radio" data-value="costume" aria-checked="true">服饰场景</button>
+              <button type="button" role="radio" data-value="general" aria-checked="false">通用场景</button>
+              <button type="button" role="radio" data-value="keeporder" aria-checked="false">按素材顺序</button>
+            </div>
+          </div>
+
+          <div class="field" data-od-id="field-resolution">
+            <span class="field-label">输出尺寸</span>
+            <div class="chips" data-seg="preset" role="group" aria-label="输出尺寸预设">
+              <button class="chip-opt" type="button" data-value="750x750" aria-pressed="true"><span>750×750</span><span class="ratio">1:1</span></button>
+              <button class="chip-opt" type="button" data-value="640x640" aria-pressed="false"><span>640×640</span><span class="ratio">1:1</span></button>
+            </div>
+            <div class="dim-row">
+              <div class="num">
+                <label class="sr-only" for="inputWidth">宽度</label>
+                <input id="inputWidth" type="number" inputmode="numeric" min="32" max="2160" step="1" value="750" />
+                <span>px</span>
+              </div>
+              <span class="dim-x" aria-hidden="true">×</span>
+              <div class="num">
+                <label class="sr-only" for="inputHeight">高度</label>
+                <input id="inputHeight" type="number" inputmode="numeric" min="32" max="2160" step="1" value="750" />
+                <span>px</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="group" data-od-id="group-duration">
+          <div class="group-head"><h2>节奏与时长</h2><span>02</span></div>
+
+          <div class="field">
+            <span class="field-label" id="styleLabel">输出节奏</span>
+            <div class="seg" role="radiogroup" aria-labelledby="styleLabel" data-seg="style">
+              <button type="button" role="radio" data-value="slow" aria-checked="false">舒缓</button>
+              <button type="button" role="radio" data-value="normal" aria-checked="true">自然</button>
+              <button type="button" role="radio" data-value="fast" aria-checked="false">动感</button>
+            </div>
+          </div>
+
+          <div class="field" id="fieldDuration">
+            <div class="field-row">
+              <label class="field-label" for="inputDuration">视频时长</label>
+              <output class="value-out" id="durationOut" for="inputDuration">6 秒</output>
+            </div>
+            <input type="range" id="inputDuration" min="6" max="9" step="1" value="6" />
+            <div class="range-scale"><span>6 秒</span><span>9 秒</span></div>
+          </div>
+        </section>
+
+        <section class="group" data-od-id="group-visual">
+          <div class="group-head"><h2>画面与转场</h2><span>03</span></div>
+
+          <div class="field">
+            <label class="field-label" for="inputTransition">转场风格</label>
+            <div class="select-wrap">
+              <select id="inputTransition">
+                <option value="">随机（跟随节奏）</option>
+                <option value="basic">无转场</option>
+                <option value="slow">舒缓</option>
+                <option value="fast">动感</option>
+                <option value="normal">自然</option>
+                <option value="ink">水墨</option>
+                <option value="glitch">机械故障</option>
+                <option value="shift">切换</option>
+                <option value="mosaic">马赛克</option>
+                <option value="shutter">百叶窗</option>
+                <option value="zoom">缩放</option>
+                <option value="mask">遮罩</option>
+                <option value="brush">笔刷</option>
+                <option value="wind">风舞</option>
+                <option value="smog">烟雾</option>
+              </select>
+              <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </div>
+            <p class="hint">共 15 种风格，留空时按输出节奏随机匹配。</p>
+          </div>
+
+          <div class="switch-list">
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">智能特效</div>
+                <div class="switch-desc">音画联动与静转动特效</div>
+              </div>
+              <button type="button" class="switch" id="swSmart" role="switch" aria-checked="true" aria-label="智能特效"></button>
+            </div>
+            <div class="switch-row">
+              <div>
+                <div class="switch-title">拼图特效</div>
+                <div class="switch-desc">单镜头内以拼图展示多个素材</div>
+              </div>
+              <button type="button" class="switch" id="swPuzzle" role="switch" aria-checked="false" aria-label="拼图特效"></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="group" data-od-id="group-audio">
+          <div class="group-head"><h2>背景音乐</h2><span>04</span></div>
+
+          <div class="field">
+            <div class="bgm" id="bgmZone">
+              <button class="bgm-empty" id="bgmEmpty" type="button">
+                <span class="bgm-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.5 17.5V6.2l9-1.7v11" />
+                    <circle cx="7" cy="17.5" r="2.5" />
+                    <circle cx="16.5" cy="15.5" r="2.5" />
+                  </svg>
+                </span>
+                <span class="bgm-copy">
+                  <span class="bgm-title">上传背景音乐</span>
+                  <span class="bgm-desc">MP3 / WAV / M4A · 最多 1 首</span>
+                </span>
+                <span class="bgm-upload">上传</span>
+              </button>
+
+              <div class="bgm-filled" id="bgmFilled" hidden>
+                <button class="bgm-play" id="btnBgmPlay" type="button" aria-label="试听背景音乐">
+                  <svg class="icon-bgm-play" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5-10-6.5Z" /></svg>
+                  <svg class="icon-bgm-pause" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="7" y="5" width="3.4" height="14" rx="1.1" /><rect x="13.6" y="5" width="3.4" height="14" rx="1.1" /></svg>
+                </button>
+                <div class="bgm-copy">
+                  <p class="bgm-name" id="bgmName">背景音乐</p>
+                  <p class="bgm-meta" id="bgmMeta">音频</p>
+                </div>
+                <button class="icon-btn icon-btn-sm" id="btnBgmReplace" type="button" title="替换背景音乐" aria-label="替换背景音乐">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 8h13l-3-3" /><path d="M20 16H7l3 3" />
+                  </svg>
+                </button>
+                <button class="icon-btn icon-btn-sm" id="btnBgmRemove" type="button" title="移除背景音乐" aria-label="移除背景音乐">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                </button>
+                <div class="bgm-track" aria-hidden="true"><span id="bgmBar"></span></div>
+              </div>
+            </div>
+            <p class="hint" id="bgmHint">最多 1 首，作为音频轨参与合成。</p>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <section class="panel stage-panel" data-od-id="preview-panel" aria-labelledby="previewTitle">
+      <div class="panel-head stage-head">
+        <div class="stage-head-main">
+          <div class="stage-title-row">
+            <h2 id="previewTitle">视频预览</h2>
+            <span class="chip chip-live" data-od-id="mode-chip"><span class="chip-dot" aria-hidden="true"></span>本地预览</span>
+          </div>
+          <p class="panel-sub" id="stageSub">750 × 750 · 6 秒</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn btn-ghost btn-sm" id="btnUrlAdd" type="button">链接添加</button>
+          <button class="btn btn-secondary btn-sm" id="btnAddFiles" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            添加素材
+          </button>
+        </div>
+      </div>
+
+      <div class="stage-wrap">
+        <div class="stage-box" id="stageBox">
+          <div class="stage-frame" id="stageFrame">
+            <div class="stage-empty" id="stageEmpty">
+              <span class="empty-icon" aria-hidden="true">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+                  <path d="M7 4v16M17 4v16M2.5 9h4.5M2.5 15h4.5M17 9h4.5M17 15h4.5" />
+                  <path d="m10.6 9.6 4.2 2.4-4.2 2.4V9.6Z" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <p class="empty-title">拖入素材，开始合成</p>
+              <p class="empty-sub">视频、图片、音频按列表顺序参与生成</p>
+              <div class="empty-actions">
+                <button class="btn btn-on-dark" id="btnEmptyPick" type="button">选择文件</button>
+                <button class="btn btn-on-dark-ghost" id="btnEmptyUrl" type="button">链接添加</button>
+              </div>
+              <p class="empty-meta">MP4 / MOV / AVI / MKV · JPG / PNG · MP3 / WAV</p>
+            </div>
+
+            <video id="previewVideo" class="stage-media" playsinline muted loop hidden></video>
+            <img id="previewImage" class="stage-media" alt="素材预览" hidden />
+
+            <span class="stage-badge" id="stageBadge" hidden>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5" /></svg>
+              预览已生成
+            </span>
+
+            <button class="play-toggle" id="playToggle" type="button" aria-label="播放预览" hidden>
+              <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5-10-6.5Z" /></svg>
+              <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="7" y="5" width="3.6" height="14" rx="1.2" /><rect x="13.4" y="5" width="3.6" height="14" rx="1.2" /></svg>
+            </button>
+
+            <div class="stage-progress" id="stageProgress" aria-live="polite" hidden>
+              <div class="progress-top">
+                <span class="progress-stage" id="progressStage">解析素材</span>
+                <span class="progress-pct"><span id="progressPct">0</span><i>%</i></span>
+              </div>
+              <div class="progress-track"><span id="progressBar"></span></div>
+              <p class="progress-note">本地预览渲染，不会上传素材</p>
+            </div>
+          </div>
+        </div>
+        <div class="strip-block">
+          <div class="strip-head">
+            <span id="stripCounts">视频 0/5 · 图片 0/40 · 音频 0/1</span>
+            <span id="stripDuration">总时长 0:00 / 3:00</span>
+          </div>
+          <div class="strip" id="strip" aria-label="已添加素材"></div>
+        </div>
+      </div>
+
+      <div class="stage-foot" data-od-id="stage-footer">
+        <div class="foot-summary" id="footSummary">0 段素材 · 750 × 750 · 6 秒</div>
+        <div class="foot-actions">
+          <button class="btn btn-secondary" id="btnPayload" type="button">请求参数</button>
+          <button class="btn btn-secondary" id="btnCancel" type="button" hidden>取消生成</button>
+          <button class="btn btn-primary" id="btnGenerate" data-od-id="btn-generate" type="button">生成视频</button>
+        </div>
+      </div>
+
+      <div class="popover" id="urlPopover" hidden>
+        <div class="popover-head">
+          <h3>链接添加素材</h3>
+          <button class="icon-btn icon-btn-sm" id="btnCloseUrl" type="button" aria-label="关闭链接添加">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <form class="popover-form" id="urlForm">
+          <label class="pop-label" for="urlType">素材类型</label>
+          <div class="select-wrap">
+            <select id="urlType">
+              <option value="video">视频</option>
+              <option value="image">图片</option>
+              <option value="audio">音频</option>
+            </select>
+            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </div>
+          <label class="pop-label" for="urlInput">文件地址</label>
+          <input class="text-input" id="urlInput" type="url" placeholder="https://…/video.mp4" autocomplete="off" required />
+          <label class="pop-label" for="urlName">文件名称 <span class="pop-optional">选填</span></label>
+          <input class="text-input" id="urlName" type="text" placeholder="1-video1.mp4" autocomplete="off" />
+          <p class="hint">链接需可公开访问，地址中不能包含中文字符。</p>
+          <div class="popover-actions">
+            <button class="btn btn-secondary btn-sm" type="button" id="btnCancelUrl">取消</button>
+            <button class="btn btn-primary btn-sm" type="submit">添加</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <aside class="drawer" id="recordsDrawer" data-od-id="records-drawer" aria-labelledby="recordsTitle" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <h2 id="recordsTitle">生成记录</h2>
+        <p class="panel-sub">保存在本机浏览器，最多保留 30 条</p>
+      </div>
+      <button class="icon-btn" id="btnCloseRecords" type="button" aria-label="关闭生成记录">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="recordsList"></div>
+    <div class="drawer-foot">
+      <button class="btn btn-secondary btn-sm" id="btnClearRecords" type="button">清空记录</button>
+    </div>
+  </aside>
+
+  <div class="modal-scrim" id="modalScrim" hidden></div>
+  <div class="modal" id="payloadModal" role="dialog" aria-modal="true" aria-labelledby="payloadTitle" hidden>
+    <div class="modal-head">
+      <div>
+        <h2 id="payloadTitle">GenerateVideo 请求参数</h2>
+        <p class="panel-sub">本地素材需先上传至 OSS，FileUrl 以占位符表示。</p>
+      </div>
+      <button class="icon-btn" id="btnClosePayload" type="button" aria-label="关闭请求参数">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <pre class="payload-code" id="payloadCode"></pre>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" id="btnCopyPayload" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.3" /><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3H6.5A2.5 2.5 0 0 0 4 5.5v6A2.5 2.5 0 0 0 6.5 14" /></svg>
+        复制参数
+      </button>
+      <button class="btn btn-primary btn-sm" id="btnClosePayload2" type="button">知道了</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <input type="file" id="fileInput" accept="video/*,image/*,audio/*" multiple hidden />
+  <input type="file" id="bgmInput" accept="audio/*" hidden />
+  <audio id="bgmAudio" preload="metadata" hidden></audio>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
